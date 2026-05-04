@@ -1,25 +1,28 @@
 package de.notev2.notev2.config;
 
+
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import java.security.Key;
-import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
 public class JwtUtil {
-    private static final String SECRET = "mysecretkeymysecretkeymysecretkey";
-    private static final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
+    
+    @Value("${jwt.secret}")
+    private String secret;
 
-    public static String generateToken(String username) {
+    public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 Tag
-                .signWith(key)
+                .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
                 .compact();
     }
-    public static String extractUsername(String token) {
+
+    public String extractUsername(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
                 .build()
                 .parseClaimsJws(token)
                 .getBody()

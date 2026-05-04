@@ -2,6 +2,7 @@ package de.notev2.notev2.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +17,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
+
+    @Autowired
+    private JwtFilter jwtFilter;
     
    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, CustomUserDetailsService userDetailsService) throws Exception {
@@ -27,7 +31,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .anyRequest().authenticated()
         )
-        .addFilterBefore(new JwtFilter(userDetailsService),
+        .addFilterBefore(jwtFilter,
              org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
     return http.build();

@@ -27,6 +27,8 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody User user) {
@@ -51,7 +53,7 @@ public class AuthController {
         
         
         if (existinguser != null && passwordEncoder.matches(user.getPassword(), existinguser.getPassword())) {
-            String token = JwtUtil.generateToken(existinguser.getUsername());
+            String token = jwtUtil.generateToken(existinguser.getUsername());
             AuthResponse response = new AuthResponse(token, "login erfolgreich");
             return ResponseEntity.ok(response);
         } else {
