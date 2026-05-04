@@ -48,7 +48,7 @@ notev2/
 
 ```bash
 cd notev2-backend
-$env:JWT_SECRET="your_secret_here"
+$env:JWT_SECRET="your_secret_here"  
 ./mvnw spring-boot:run
 ```
 
@@ -65,7 +65,7 @@ npm run dev
 Erstelle eine `.env` Datei im Backend-Ordner (nicht committen):
 
 ```
-JWT_SECRET=your_super_secret_key
+JWT_SECRET=your_super_secret_key **mindenstens 32bit**
 ```
 
 ---
