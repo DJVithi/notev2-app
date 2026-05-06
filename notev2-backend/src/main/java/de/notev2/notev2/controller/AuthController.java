@@ -12,7 +12,7 @@ import de.notev2.notev2.entity.User;
 import de.notev2.notev2.service.AuthService;
 import de.notev2.notev2.dto.AuthResponse;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
