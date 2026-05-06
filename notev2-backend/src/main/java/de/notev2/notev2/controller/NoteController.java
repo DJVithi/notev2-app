@@ -13,62 +13,39 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.notev2.notev2.entity.Note;
-import de.notev2.notev2.entity.User;
-import de.notev2.notev2.repos.NoteRepository;
-import de.notev2.notev2.repos.UserRepository;
+import de.notev2.notev2.service.NotesService;
 
 @RestController
 @RequestMapping("/notes")
 public class NoteController {
 
-    private final NoteRepository noteRepository;
-    private final UserRepository userRepository;
+    private final NotesService noteService;
 
-    public NoteController(NoteRepository noteRepository, UserRepository userRepository) {
-        this.noteRepository = noteRepository;
-        this.userRepository = userRepository;
+    public NoteController(NotesService noteService) {
+        this.noteService = noteService;
     }
-
 
     @PostMapping
     public Note createNote(@RequestBody Note note, Authentication auth) {
-        String username = auth.getName();
-        User user = userRepository.findByUsername(username);
-        note.setUser(user);
-        return noteRepository.save(note);
+        return noteService.createNote(note, auth.getName());
     }
 
     @GetMapping
     public List<Note> getMyNotes(Authentication auth) {
-        String username = auth.getName();
-        User user = userRepository.findByUsername(username);
-        return noteRepository.findByUser(user);
-    }
-    
-    @GetMapping("/user/{userId}")
-    public List<Note> getAll(@PathVariable Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        return noteRepository.findByUser(user);
+        return noteService.getMyNotes(auth.getName());
     }
 
+    @GetMapping("/user/{userId}")
+    public List<Note> getAll(@PathVariable Long userId) {
+        return noteService.getNotesByUserId(userId);
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNote(@PathVariable Long id, Authentication auth) {
-        String username = auth.getName();
-        Note note = noteRepository.findById(id).orElse(null);
-
-        if (note == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        if (!note.getUser().getUsername().equals(username)) {
-            return ResponseEntity.status(403).body("Notiz gehört nicht dem Benutzer");
-        }
-
-        noteRepository.delete(note);
-
+        noteService.deleteNote(id, auth.getName());
         return ResponseEntity.ok().build();
     }
+}
 
     
-}
+

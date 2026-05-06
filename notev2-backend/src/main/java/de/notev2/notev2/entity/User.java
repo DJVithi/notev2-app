@@ -21,6 +21,10 @@ public class User {
     public Long getId() {
         return id;
     }
+    public void setLongId(Long id) {
+        this.id = id;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }

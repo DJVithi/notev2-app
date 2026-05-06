@@ -19,6 +19,9 @@ public class Note {
     public Long getId() {
         return id;
     }
+    public void setLongId(Long id) {
+        this.id = id;
+    }
     public void setTitle(String title) {
         this.title = title;
     }

@@ -1,0 +1,193 @@
+package de.notev2.notev2;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import de.notev2.notev2.config.JwtUtil;
+import de.notev2.notev2.entity.User;
+import de.notev2.notev2.repos.UserRepository;
+import de.notev2.notev2.service.AuthService;
+
+@ExtendWith(MockitoExtension.class)
+class AuthServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private JwtUtil jwtUtil;
+
+    @InjectMocks
+    private AuthService authService;
+
+    // =========================
+    // REGISTER TESTS
+    // =========================
+
+    @Test
+    void shouldRegisterUser() {
+        User user = new User();
+        user.setUsername("deniz");
+        user.setPassword("123");
+
+        when(userRepository.findByUsername("deniz")).thenReturn(null);
+        when(passwordEncoder.encode("123")).thenReturn("hashed_123");
+
+        String result = authService.register(user);
+
+        assertEquals("Registrierung erfolgreich", result);
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void shouldNotRegisterUserWithExistingUsername() {
+        User existingUser = new User();
+        existingUser.setUsername("deniz");
+
+        User newUser = new User();
+        newUser.setUsername("deniz");
+        newUser.setPassword("123");
+
+        when(userRepository.findByUsername("deniz")).thenReturn(existingUser);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            authService.register(newUser);
+        });
+
+        assertEquals("Username bereits vergeben", exception.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldNotRegisterUserWithEmptyPassword() {
+        User user = new User();
+        user.setUsername("deniz");
+        user.setPassword("");
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            authService.register(user);
+        });
+
+        assertEquals("Benutzername und/oder Passwort fehlen", exception.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldNotRegisterUserWithEmptyUsername() {
+        User user = new User();
+        user.setUsername("");
+        user.setPassword("123");
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            authService.register(user);
+        });
+
+        assertEquals("Benutzername und/oder Passwort fehlen", exception.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    // =========================
+    // LOGIN TESTS
+    // =========================
+
+    @Test
+    void shouldLoginUser() {
+        User requestUser = new User();
+        requestUser.setUsername("deniz");
+        requestUser.setPassword("123");
+
+        User dbUser = new User();
+        dbUser.setUsername("deniz");
+        dbUser.setPassword("hashed_password");
+
+        when(userRepository.findByUsername("deniz")).thenReturn(dbUser);
+        when(passwordEncoder.matches("123", "hashed_password")).thenReturn(true);
+        when(jwtUtil.generateToken("deniz")).thenReturn("test_token");
+
+        String result = authService.login(requestUser);
+
+        assertEquals("test_token", result);
+    }
+
+    @Test
+    void shouldNotLoginWithWrongPassword() {
+        User requestUser = new User();
+        requestUser.setUsername("deniz");
+        requestUser.setPassword("wrong");
+
+        User dbUser = new User();
+        dbUser.setUsername("deniz");
+        dbUser.setPassword("hashed_password");
+
+        when(userRepository.findByUsername("deniz")).thenReturn(dbUser);
+        when(passwordEncoder.matches("wrong", "hashed_password")).thenReturn(false);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            authService.login(requestUser);
+        });
+
+        assertEquals("Benutzername oder Passwort falsch", exception.getMessage());
+    }
+
+    @Test
+    void shouldNotLoginWithNonExistingUser() {
+        User user = new User();
+        user.setUsername("deniz");
+        user.setPassword("123");
+
+        when(userRepository.findByUsername("deniz")).thenReturn(null);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            authService.login(user);
+        });
+
+        assertEquals("Benutzername oder Passwort falsch", exception.getMessage());
+    }
+
+    @Test
+    void shouldNotLoginWithEmptyUsername() {
+        User user = new User();
+        user.setUsername("");
+        user.setPassword("123");
+
+        when(userRepository.findByUsername("")).thenReturn(null);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            authService.login(user);
+        });
+
+        assertEquals("Benutzername oder Passwort falsch", exception.getMessage());
+    }
+
+    @Test
+    void shouldNotLoginWithEmptyPassword() {
+        User requestUser = new User();
+        requestUser.setUsername("deniz");
+        requestUser.setPassword("");
+
+        User dbUser = new User();
+        dbUser.setUsername("deniz");
+        dbUser.setPassword("hashed_password");
+
+        when(userRepository.findByUsername("deniz")).thenReturn(dbUser);
+        when(passwordEncoder.matches("", "hashed_password")).thenReturn(false);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            authService.login(requestUser);
+        });
+
+        assertEquals("Benutzername oder Passwort falsch", exception.getMessage());
+    }
+}
