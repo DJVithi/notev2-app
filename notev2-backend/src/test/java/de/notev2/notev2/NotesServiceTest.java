@@ -89,35 +89,6 @@ class NotesServiceTest {
         assertEquals(2, result.size());
     }
 
-    // =========================
-    // GET NOTES BY USER ID
-    // =========================
-
-    @Test
-    void shouldReturnNotesByUserId() {
-        User user = new User();
-        user.setLongId(1L);
-
-        List<Note> notes = List.of(new Note());
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(noteRepository.findByUser(user)).thenReturn(notes);
-
-        List<Note> result = notesService.getNotesByUserId(1L);
-
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    void shouldThrowIfUserNotFound() {
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
-
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            notesService.getNotesByUserId(1L);
-        });
-
-        assertEquals("User nicht gefunden", exception.getMessage());
-    }
 
     // =========================
     // DELETE NOTE

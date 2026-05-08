@@ -1,6 +1,8 @@
 package de.notev2.notev2.entity;
 
-     import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
 
 @Entity
 public class Note {
@@ -9,6 +11,7 @@ public class Note {
     private Long id;
     private String title;
     private String content;
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -40,6 +43,9 @@ public class Note {
     public User getUser() {
         return user;
     }
-
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
 }

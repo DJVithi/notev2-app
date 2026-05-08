@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.notev2.notev2.entity.Note;
 import de.notev2.notev2.service.NotesService;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 @RestController
 @RequestMapping("/notes")
@@ -35,15 +37,17 @@ public class NoteController {
         return noteService.getMyNotes(auth.getName());
     }
 
-    @GetMapping("/user/{userId}")
-    public List<Note> getAll(@PathVariable Long userId) {
-        return noteService.getNotesByUserId(userId);
-    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNote(@PathVariable Long id, Authentication auth) {
         noteService.deleteNote(id, auth.getName());
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Note> updateNote(@PathVariable Long id, @RequestBody Note updatedNote, Authentication auth) {
+        Note result = noteService.updateNote(id, updatedNote, auth.getName());
+        return ResponseEntity.ok(result);
     }
 }
 

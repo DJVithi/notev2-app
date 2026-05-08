@@ -13,5 +13,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
 
     List<Note> findByUser(User user);
     Optional<Note> findById(Long id);
+    List<Note> findByUserOrderByIdDesc(User user);
+    List<Note> findByUserOrderByCreatedAtDesc(User user);
     
 }

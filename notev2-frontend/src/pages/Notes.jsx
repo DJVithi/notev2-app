@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { getNotes, createNote, deleteNote} from "../api/notes";
+import { getNotes, createNote, deleteNote, updateNote} from "../api/notes";
 import { getCurrentUser} from "../api/auth";
 
 function Notes() {
   const [notes, setNotes] = useState([]);
-  const [newNote, setNewNote] = useState("");
-  const [newTitle, setNewTitle] = useState("");
+  const [selectedNote, setSelectedNote] = useState(null);
+
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [noteId, setNoteId] = useState(null);
 
   useEffect(() => {
     fetchNotes();
@@ -35,18 +37,31 @@ function Notes() {
     }
   };
 
+  const handleSelect = (note) => {
+    if (selectedNote && selectedNote.id === note.id) {
+      setSelectedNote(null);
+      setTitle("");
+      setContent("");
+      return;
+    } else {
+    setSelectedNote(note);
+    setTitle(note.title);
+    setContent(note.content);
+    }
+  };
+
   const handleCreateNote = async () => {
     try {
-      const response = await createNote({ title: newTitle, content: newNote });
-      setNewTitle("");
-      setNewNote("");
-      setSuccess("Notiz erstellt");
-      setError("");
-      setTimeout(() => {
-        setSuccess("");
-      }, 2000);
+      const response = await createNote({ title: "Neue Notiz", content: "" });
+      const newNote = response.data;
 
-      fetchNotes();
+      setNotes((prevNotes) => [ newNote, ...prevNotes ]);
+
+      setSelectedNote(newNote);
+      setTitle(newNote.title);
+      setContent(newNote.content);
+      setError("");
+
     } catch (error) {
       console.error(error);
       setError(error.response.data.message);
@@ -54,12 +69,42 @@ function Notes() {
     }
   };
 
-  const handleDeleteNote = async (id) => {
+  const handleUpdate = async () => {
+    try {
+      const updatedNote = {...selectedNote, title, content };
+      await updateNote(selectedNote.id, updatedNote);
+
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.id === selectedNote.id ? updatedNote : note
+        )
+      );
+      setSelectedNote(updatedNote);
+
+      setSuccess("Aktualisiert");
+      setTimeout(() => {
+        setSuccess("");
+      }, 2000);
+      setError("");
+    } catch (error) {
+      setError(error.response.data.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
     try {
       await deleteNote(id);
-      fetchNotes();
+
+      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+
       setSuccess("Notiz gelöscht");
+      setTimeout(() => {
+        setSuccess("");
+      }, 2000);
       setError("");
+      setTitle("");
+      setContent("");
+      setSelectedNote(null);
     } catch (error) {
       console.error(error);
       setError(error.response.data.message);
@@ -72,11 +117,6 @@ function Notes() {
     window.location.href = "/login";
   };
 
-  const activeNote = notes.find(note => note.id === noteId);
-
-  const toggleNote = (id) => {
-    setNoteId(noteId === id ? null : id);
-  }
 
 
   return (
@@ -98,26 +138,14 @@ function Notes() {
     <p className="mb-4">Eingeloggt als: {username}</p>
 
     <div className="flex gap-2 mb-6">
-      <input
-        type="title"
-        placeholder="Titel..."
-        value={newTitle}
-        onChange={(e) => setNewTitle(e.target.value)}
-        className="flex-1 p-2 border rounded"
-      />
-      <input
-        type="text"
-        placeholder="Inhalt..."
-        value={newNote}
-        onChange={(e) => setNewNote(e.target.value)}
-        className="flex-1 p-2 border rounded"
-      />
-      <button
-        onClick={handleCreateNote}
-        className="bg-green-500 text-white px-4 rounded hover:bg-green-600"
-      > 
-        +
-      </button>
+        <button
+          onClick={handleCreateNote}
+          
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
+          Neue Notiz erstellen
+        </button>
+    
     </div>
     
 
@@ -126,45 +154,55 @@ function Notes() {
       {notes.map((note) => (
         <li
           key={note.id}
-
-          onClick={() => toggleNote(note.id)}
+          onClick={() => handleSelect(note)}
           className={`p-4 rounded shadow cursor-pointer transition-colors ${
-                noteId === note.id ? "bg-blue-500 text-white" : "bg-white hover:bg-gray-50"
+                selectedNote?.id === note.id ? "bg-blue-500 text-white" : "bg-white hover:bg-gray-50"
               }`}
-          
         > 
         <div className="flex justify-between items-center">
           <span className="font-semibold truncate">{note.title}</span>
          <button
           onClick={(e) => {
-            e.stopPropagation(); // Verhindert, dass beim Löschen die Notiz aufklappt
-            handleDeleteNote(note.id);
+            e.stopPropagation(); 
+            handleDelete(note.id);
           }}
-          
           className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
         >
           Löschen
           </button>
         </div>
-        </li>
+      </li>
       ))}
     </ul>
+
     <div className="w-2/3 bg-white p-8 rounded shadow-lg border border-gray-200 min-h-[300px]">
-          {activeNote ? (
-            <div>
-              <h3 className="text-3xl font-bold mb-4 border-b pb-2 text-gray-800 truncate">{activeNote.title}</h3>
-              <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {activeNote.content}
-              </p>
-            </div>
-          ) : (
+      {selectedNote ? (
+      <>
+      <input
+        type="text"
+        placeholder="Titel..."
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full text-2xl font-bold mb-4 border-b p-2"
+      />
+      <textarea 
+        className="w-full h-60 border p-2 rounded"
+        value={content} 
+        onChange={(e) => setContent(e.target.value)} 
+        />
+        <button 
+          onClick={handleUpdate} 
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Speichern
+        </button>
+        </>
+       ) :(
             <div className="h-full flex items-center justify-center text-gray-400 italic">
               Wähle eine Notiz aus der Liste aus, um den Inhalt zu lesen.
             </div>
           )}
+          
         </div>
-
-    <div className="text-center text-gray-500 mt-4"> test </div>
      </div> 
   </div>
 );

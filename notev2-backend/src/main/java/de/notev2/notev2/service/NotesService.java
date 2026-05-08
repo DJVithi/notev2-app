@@ -35,16 +35,8 @@ public class NotesService {
 
     public List<Note> getMyNotes(String username) {
         User user = userRepository.findByUsername(username);
-        return noteRepository.findByUser(user);
+        return noteRepository.findByUserOrderByCreatedAtDesc(user);
     }
-
-    public List<Note> getNotesByUserId(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User nicht gefunden"));
-
-        return noteRepository.findByUser(user);
-    }
-
 
 
     public void deleteNote(Long id, String username) {
@@ -60,5 +52,21 @@ public class NotesService {
 
         noteRepository.delete(note);
 
+    }
+
+    public Note updateNote(Long id, Note updatedNote, String username) {
+        Note note = noteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Notiz nicht gefunden"));
+
+        if (!note.getUser().getUsername().equals(username)) {
+            throw new InvalidCredentialsException("Notiz gehört nicht dem Benutzer");
+        }
+
+        if (updatedNote.getTitle() == null || updatedNote.getTitle().isEmpty()) {
+            throw new EmptyFieldException("Titel darf nicht leer sein");
+        }
+
+        note.setTitle(updatedNote.getTitle());
+        note.setContent(updatedNote.getContent());
+        return noteRepository.save(note);
     }
 }
