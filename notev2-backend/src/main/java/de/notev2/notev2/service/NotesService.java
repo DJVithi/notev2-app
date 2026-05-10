@@ -35,7 +35,7 @@ public class NotesService {
 
     public List<Note> getMyNotes(String username) {
         User user = userRepository.findByUsername(username);
-        return noteRepository.findByUserOrderByCreatedAtDesc(user);
+        return noteRepository.findByUserOrderByIdDesc(user);
     }
 
 

@@ -1,0 +1,34 @@
+services:
+  backend: 
+    build: 
+      context: ./notev2-backend 
+      dockerfile: Dockerfile
+    ports: 
+      - '8080:8080'
+    depends_on:
+      - db
+    environment:
+        - JWT_SECRET=aVeryLongRandomSecretKeyForJwtThatIsDefinitelySecure123456
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/notesdb
+        - SPRING_DATASOURCE_USERNAME=postgres
+        - SPRING_DATASOURCE_PASSWORD=postgres
+  db:
+    image: postgres:17
+    environment:
+      - POSTGRES_DB=notesdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  frontend:
+    build: 
+      context: ./notev2-frontend
+      dockerfile: Dockerfile
+    ports: 
+      - '5173:5173'
+  
+volumes:
+  postgres_data:

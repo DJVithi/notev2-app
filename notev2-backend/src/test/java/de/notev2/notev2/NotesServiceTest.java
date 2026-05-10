@@ -82,7 +82,7 @@ class NotesServiceTest {
         List<Note> notes = List.of(new Note(), new Note());
 
         when(userRepository.findByUsername("deniz")).thenReturn(user);
-        when(noteRepository.findByUserOrderByCreatedAtDesc(user)).thenReturn(notes);
+        when(noteRepository.findByUserOrderByIdDesc(user)).thenReturn(notes);
 
         List<Note> result = notesService.getMyNotes("deniz");
 
