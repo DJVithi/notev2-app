@@ -1,4 +1,4 @@
-FROM   container-registry.oracle.com/java/openjdk:25
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
