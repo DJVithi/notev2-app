@@ -25,7 +25,10 @@ public class JwtFilter extends OncePerRequestFilter {
         this.jwtUtil = jwtUtil;
     }
 
-
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getMethod().equalsIgnoreCase("OPTIONS"); // ← das fehlt noch
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -33,10 +36,10 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
-           filterChain.doFilter(request, response);
-           return;
-        }
+      // if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+      //    filterChain.doFilter(request, response);
+      //    return;
+      // }
 
         String path = request.getServletPath();
         if (path.startsWith("/auth") && !path.equals("/auth/me")) {
