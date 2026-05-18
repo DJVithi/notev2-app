@@ -13,6 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import de.notev2.notev2.dto.NoteCreationRequest;
+import de.notev2.notev2.dto.NoteResponse;
 import de.notev2.notev2.entity.Note;
 import de.notev2.notev2.entity.User;
 import de.notev2.notev2.exception.EmptyFieldException;
@@ -43,27 +45,39 @@ class NotesServiceTest {
         User user = new User();
         user.setUsername("deniz");
 
+        NoteCreationRequest dto = new NoteCreationRequest();
+        dto.setTitle("Test");
+        dto.setContent("Test Content");
+
         Note note = new Note();
-        note.setTitle("Test");
-        note.setContent("Test Content");
+        note.setTitle(dto.getTitle());
+        note.setContent(dto.getContent());
 
         when(userRepository.findByUsername("deniz")).thenReturn(user);
         when(noteRepository.save(any(Note.class))).thenReturn(note);
 
-        Note result = notesService.createNote(note, "deniz");
+        NoteResponse result = notesService.createNote(dto, "deniz");
 
         assertEquals("Test", result.getTitle());
-        verify(noteRepository, times(1)).save(note);
+        verify(noteRepository, times(1)).save(any(Note.class));
     }
 
     @Test
     void shouldNotCreateNoteWithEmptyTitle() {
-        Note note = new Note();
-        note.setTitle("");
-        note.setContent("Test");
+        User user = new User();
+        user.setLongId(1L);
+        user.setUsername("deniz");
+
+        when(userRepository.findByUsername("deniz")).thenReturn(user);
+
+        NoteCreationRequest dto = new NoteCreationRequest();
+        dto.setTitle("");
+        dto.setContent("Test");
+
+
 
         EmptyFieldException exception = assertThrows(EmptyFieldException.class, () -> {
-            notesService.createNote(note, "deniz");
+            notesService.createNote(dto, "deniz");
         });
 
         assertEquals("Titel darf nicht leer sein", exception.getMessage());
@@ -81,10 +95,11 @@ class NotesServiceTest {
 
         List<Note> notes = List.of(new Note(), new Note());
 
+
         when(userRepository.findByUsername("deniz")).thenReturn(user);
         when(noteRepository.findByUserOrderByIdDesc(user)).thenReturn(notes);
 
-        List<Note> result = notesService.getMyNotes("deniz");
+        List<NoteResponse> result = notesService.getMyNotes("deniz");
 
         assertEquals(2, result.size());
     }
@@ -98,6 +113,8 @@ class NotesServiceTest {
     void shouldDeleteNote() {
         User user = new User();
         user.setUsername("deniz");
+        user.setLongId(1L);
+        when(userRepository.findByUsername("deniz")).thenReturn(user);
 
         Note note = new Note();
         note.setLongId(1L);
@@ -112,7 +129,14 @@ class NotesServiceTest {
 
     @Test
     void shouldNotDeleteIfNoteNotFound() {
+
+        User user = new User();
+        user.setUsername("deniz");
+        user.setLongId(1L);
+
+        when(userRepository.findByUsername("deniz")).thenReturn(user);
         when(noteRepository.findById(1L)).thenReturn(Optional.empty());
+        
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             notesService.deleteNote(1L, "deniz");
@@ -125,6 +149,13 @@ class NotesServiceTest {
     void shouldNotDeleteIfNotOwner() {
         User owner = new User();
         owner.setUsername("someoneElse");
+        owner.setLongId(2L);
+
+        User user = new User();
+        user.setUsername("deniz");
+        user.setLongId(1L);
+
+        when(userRepository.findByUsername("deniz")).thenReturn(user);
 
         Note note = new Note();
         note.setUser(owner);
