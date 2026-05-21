@@ -53,23 +53,32 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
             String token = authHeader.substring(7);
-            String username = jwtUtil.extractUsername(token);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                String username = jwtUtil.extractUsername(token);
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"" + e.getMessage() + "\"}");
+                return;
+                }
         }
 
         filterChain.doFilter(request, response);

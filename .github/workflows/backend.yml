@@ -31,6 +31,10 @@ jobs:
             maven-${{ runner.os }}-
 
       - name: Tests ausführen
+        
+        env:
+          JWT_SECRET: aVeryLongRandomSecretKeyForJwtThatIsDefinitelySecure123456
         run: |
           cd notev2-backend
+          chmod +x mvnw
           ./mvnw test
