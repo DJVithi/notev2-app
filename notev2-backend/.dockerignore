@@ -1,2 +1,13 @@
 .env
-target/
+/src/test/
+
+
+/target/
+/.mvn/
+/mvnw
+/mvnw.cmd
+
+
+/.idea/
+/*.iml
+/.vscode/
