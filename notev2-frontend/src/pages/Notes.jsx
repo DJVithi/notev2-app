@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getNotes, createNote, deleteNote, updateNote} from "../api/notes";
 import { getCurrentUser} from "../api/auth";
+import { useNavigate } from "react-router-dom";
+import { isAdmin } from "../utils/auth";
 
 function Notes() {
   const [notes, setNotes] = useState([]);
@@ -12,6 +14,7 @@ function Notes() {
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchNotes();
@@ -117,6 +120,14 @@ function Notes() {
     window.location.href = "/login";
   };
 
+  const handleAdmin = () => {
+    if (!isAdmin()) {
+      setError("Zugriff verweigert: Admins only");
+      return;
+    } else {
+    navigate("/user");
+    }
+  }
 
 
   return (
@@ -134,6 +145,14 @@ function Notes() {
         Logout
       </button>
     </div>
+    {isAdmin() && (
+      <button
+        onClick={handleAdmin}
+        className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+      >
+        Benutzerverwaltung
+      </button>
+    )}
 
     <p className="mb-4">Eingeloggt als: {username}</p>
 

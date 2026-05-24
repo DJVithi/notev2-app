@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import de.notev2.notev2.config.JwtUtil;
@@ -43,14 +45,22 @@ public class NoteControllerTest {
     private User testuser;
 
     @BeforeEach
-    void setUp() {
-        testuser = new User();
-        testuser.setUsername("deniz");
-        testuser.setPassword("123");
-        userRepository.save(testuser);
+void setUp() {
+    testuser = new User();
+    testuser.setUsername("deniz");
+    testuser.setPassword("123");
+    testuser.setAdmin(false); // ← hinzufügen
+    userRepository.save(testuser);
 
-        validToken = jwtUtil.generateToken(testuser.getUsername());
-    }
+    // UserDetails bauen wie in CustomUserDetailsService
+    UserDetails userDetails = org.springframework.security.core.userdetails.User
+            .withUsername(testuser.getUsername())
+            .password(testuser.getPassword())
+            .authorities(new SimpleGrantedAuthority("ROLE_USER"))
+            .build();
+
+    validToken = jwtUtil.generateToken(userDetails); // ← UserDetails statt String
+}
 
     @Test
     void createNote_shouldReturnCreateNote() throws Exception {

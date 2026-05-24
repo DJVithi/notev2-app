@@ -29,30 +29,6 @@ function Register()  {
         setPassword("");
     };  
     
-   /* return (
-        <div className="register">  
-            <h1>Register</h1>
-            {error && <p style={{ color: "red", fontWeight: "bold" }}>{error}</p>}
-            {success && <p style={{ color: "green", fontWeight: "bold" }}>{success}</p>}
-
-            <form onSubmit={handleRegister}>
-                <input 
-                    type="text"
-                    placeholder="Your Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Your Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <button type="submit">Register</button>
-
-            </form>
-        </div>
-    ); */
 
     return (
   <div className="flex items-center justify-center h-screen bg-gray-100">

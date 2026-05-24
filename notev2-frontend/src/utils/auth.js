@@ -1,6 +1,3 @@
-import API from "./api";
-
-export const getCurrentUser = () => API.get("/auth/me");
 export const getTokenPayload = () => {
   const token = localStorage.getItem("token");
   if (!token) return null;

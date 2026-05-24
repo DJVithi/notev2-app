@@ -1,9 +1,12 @@
 package de.notev2.notev2.service;
 
+
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import de.notev2.notev2.config.CustomUserDetailsService;
 import de.notev2.notev2.config.JwtUtil;
 import de.notev2.notev2.entity.User;
 import de.notev2.notev2.exception.EmptyFieldException;
@@ -17,13 +20,16 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final CustomUserDetailsService userDetailsService;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       JwtUtil jwtUtil) {
+                       JwtUtil jwtUtil,
+                       CustomUserDetailsService userDetailsService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
     }
 
     public String register(User user) {
@@ -35,9 +41,6 @@ public class AuthService {
 
         if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new UserAlreadyExistsException("Username bereits vergeben");
-        }
-        if (user.getPassword() == null || user.getPassword().isEmpty()) {
-            throw new EmptyFieldException("Passwort darf nicht leer sein");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
@@ -52,7 +55,8 @@ public class AuthService {
         if (existingUser != null &&
             passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
 
-            return jwtUtil.generateToken(existingUser.getUsername());
+            UserDetails userDetails = userDetailsService.loadUserByUsername(existingUser.getUsername());
+            return jwtUtil.generateToken(userDetails);
         }
 
         throw new InvalidCredentialsException("Benutzername oder Passwort falsch");

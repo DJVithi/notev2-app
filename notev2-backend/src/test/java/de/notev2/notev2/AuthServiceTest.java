@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import de.notev2.notev2.config.JwtUtil;
@@ -107,17 +108,17 @@ class AuthServiceTest {
         User requestUser = new User();
         requestUser.setUsername("deniz");
         requestUser.setPassword("123");
-
+        
         User dbUser = new User();
         dbUser.setUsername("deniz");
         dbUser.setPassword("hashed_password");
-
+        dbUser.setAdmin(false); // ← hinzufügen
+    
         when(userRepository.findByUsername("deniz")).thenReturn(dbUser);
         when(passwordEncoder.matches("123", "hashed_password")).thenReturn(true);
-        when(jwtUtil.generateToken("deniz")).thenReturn("test_token");
-
+        when(jwtUtil.generateToken(any(UserDetails.class))).thenReturn("test_token"); // ← UserDetails statt String
+        
         String result = authService.login(requestUser);
-
         assertEquals("test_token", result);
     }
 
