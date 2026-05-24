@@ -10,9 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import de.notev2.notev2.config.CustomUserDetailsService;
 import de.notev2.notev2.config.JwtUtil;
 import de.notev2.notev2.entity.User;
 import de.notev2.notev2.repos.UserRepository;
@@ -29,6 +31,9 @@ class AuthServiceTest {
 
     @Mock
     private JwtUtil jwtUtil;
+
+    @Mock
+    private CustomUserDetailsService userDetailsService; // ← fehlt, hinzufügen
 
     @InjectMocks
     private AuthService authService;
@@ -108,16 +113,23 @@ class AuthServiceTest {
         User requestUser = new User();
         requestUser.setUsername("deniz");
         requestUser.setPassword("123");
-        
+
         User dbUser = new User();
         dbUser.setUsername("deniz");
         dbUser.setPassword("hashed_password");
         dbUser.setAdmin(false); // ← hinzufügen
-    
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
+            .withUsername("deniz")
+            .password("hashed_password")
+            .authorities(new SimpleGrantedAuthority("ROLE_USER"))
+            .build();
+
         when(userRepository.findByUsername("deniz")).thenReturn(dbUser);
         when(passwordEncoder.matches("123", "hashed_password")).thenReturn(true);
-        when(jwtUtil.generateToken(any(UserDetails.class))).thenReturn("test_token"); // ← UserDetails statt String
-        
+        when(userDetailsService.loadUserByUsername("deniz")).thenReturn(userDetails); // ← neu
+        when(jwtUtil.generateToken(any(UserDetails.class))).thenReturn("test_token");
+
         String result = authService.login(requestUser);
         assertEquals("test_token", result);
     }
