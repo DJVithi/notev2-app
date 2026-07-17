@@ -10,6 +10,7 @@ Eine Fullstack-Webanwendung zum Erstellen und Verwalten von Notizen mit Benutzer
 - Multi-User System – jeder Nutzer sieht ausschließlich eigene Notizen
 - Notizen erstellen und löschen
 - Geschützte API-Endpunkte via Spring Security
+- Rate Limiting auf Auth-Endpoints (Schutz vor Brute-Force, Bucket4j)
 - REST API für Frontend-Kommunikation
 
 ---
@@ -17,8 +18,9 @@ Eine Fullstack-Webanwendung zum Erstellen und Verwalten von Notizen mit Benutzer
 ## Tech Stack
 
 **Backend**
-- Java, Spring Boot, Spring Security
+- Java 25, Spring Boot 4, Spring Security
 - JWT (JSON Web Token)
+- Bucket4j (Rate Limiting)
 - PostgreSQL, JPA / Hibernate
 
 **Frontend**
@@ -29,7 +31,6 @@ Eine Fullstack-Webanwendung zum Erstellen und Verwalten von Notizen mit Benutzer
 
 ## Projektstruktur
 
-```
 notev2/
 ├── notev2-backend/
 │   ├── src/
@@ -39,7 +40,6 @@ notev2/
 │   └── package.json
 ├── load-test.js
 └── README.md
-```
 
 ---
 
@@ -64,10 +64,7 @@ npm run dev
 **Environment Variablen**
 
 Erstelle eine `.env` Datei im Backend-Ordner (nicht committen):
-
-```
-JWT_SECRET=your_super_secret_key **mindenstens 32bit**
-```
+JWT_SECRET=your_super_secret_key_mindestens_32_zeichen_lang
 
 ---
 
@@ -78,7 +75,7 @@ JWT_SECRET=your_super_secret_key **mindenstens 32bit**
 | Methode | Endpoint         | Beschreibung              |
 |---------|------------------|---------------------------|
 | POST    | /auth/register   | Benutzer registrieren     |
-| POST    | /auth/login      | Login + JWT erhalten      |
+| POST    | /auth/login      | Login + JWT erhalten (rate-limited) |
 | GET     | /auth/me         | Aktueller Benutzer        |
 
 **Notes**
@@ -94,8 +91,9 @@ JWT_SECRET=your_super_secret_key **mindenstens 32bit**
 ## Sicherheit
 
 - Passwörter werden mit BCrypt gehasht
-- JWT wird für Authentifizierung verwendet
+- JWT wird für Authentifizierung verwendet (mit Expiry & differenzierter Fehlerbehandlung)
 - Geschützte Routen via Spring Security
+- Rate Limiting (Token-Bucket-Algorithmus, Bucket4j) auf `/auth/login` und `/auth/register`, um Brute-Force-Angriffe zu erschweren
 - Secrets werden über Environment Variablen verwaltet
 
 ---
@@ -106,41 +104,50 @@ Die REST API wurde lokal mit **Grafana k6** unter Last getestet.
 
 ### Testumgebung
 
-- Backend: Spring Boot 3
+- Backend: Spring Boot 4, Java 25
 - Datenbank: PostgreSQL (Docker)
 - Testtool: Grafana k6
 - Testsystem: Lokaler Entwicklungsrechner
 
-### Ergebnisse
+### Ergebnisse – `/notes` (ohne Rate Limiting, authentifizierte Requests)
 
 | Metrik | 100 Virtual Users | 500 Virtual Users |
 |--------|------------------:|------------------:|
 | Dauer | 30 s | 30 s |
 | Requests | 109.213 | 101.353 |
 | Requests/s | 3.638 | 3.365 |
-| Durchschnittliche Antwortszeit | 27,38 ms | 146,98 ms |
-| p95 Antwortszeit | 83,56 ms | 331,69 ms |
-| Maximale Antwortszeit | 282 ms | 1,43 s |
-| Fehlerrate | **0 %** | **0,64 %** |
+| Durchschnittliche Antwortzeit | 27,38 ms | 146,98 ms |
+| p95 Antwortzeit | 83,56 ms | 331,69 ms |
+| Maximale Antwortzeit | 282 ms | 1,43 s |
+| Fehlerrate | 0 % | 0,64 % |
 
-### Beobachtungen
+Beobachtung: Bei 500 VUs stieg die CPU-Auslastung des Spring-Boot-Containers auf ca. 450 % (≈ 4,5 Kerne), PostgreSQL auf ca. 100 %. Da `/notes` nicht rate-limited ist, verarbeitet jede Anfrage vollständig bis zur DB – das zeigt den DB-Connection-Pool als Flaschenhals unter hoher Last.
 
-- Die Anwendung blieb bei **100 gleichzeitigen Benutzern** vollständig stabil.
-- Auch bei **500 gleichzeitigen Benutzern** blieb die API größtenteils stabil und verarbeitete weiterhin über **3.300 Requests pro Sekunde**.
-- Unter hoher Last stieg die CPU-Auslastung des Spring-Boot-Containers auf etwa **450 %** (≈ 4,5 CPU-Kerne) und die PostgreSQL-Datenbank auf etwa **100 %** (≈ 1 CPU-Kern).
-- Bei maximaler Last traten vereinzelt Verbindungsfehler auf (0,64 % Fehlerrate), was auf die Auslastungsgrenze des lokalen Testsystems hinweist.
+### Ergebnisse – `/auth/login` (mit Rate Limiting, 5 Requests/Min pro IP)
+
+| Metrik | 100 Virtual Users |
+|--------|------------------:|
+| Dauer | 30 s |
+| Requests | 359.731 |
+| Requests/s | ~11.990 |
+| Durchschnittliche Antwortzeit | 8,14 ms |
+| p95 Antwortzeit | 15,38 ms |
+| Anteil abgelehnt (429) | ~99,997 % |
+
+Beobachtung: Rate Limiting greift bereits vor jeglicher Business-Logik/DB-Zugriff, wodurch Antwortzeiten und CPU-Last drastisch niedriger bleiben als bei ungeschützten Endpoints unter vergleichbarer Last.
 
 ### Test ausführen
 
 ```bash
 k6 run load-test.js
 ```
+
 ---
 
 ## Deployment
 
-- Backend: Render / Railway
-- Frontend: Vercel
+- Geplant: Azure (Backend als Container, Frontend als Static Web App)
+- Aktuell lokal via Docker Compose lauffähig
 
 ---
 
@@ -149,7 +156,8 @@ k6 run load-test.js
 - Notizen bearbeiten
 - Dark Mode
 - Responsives Design verbessern
-- CI/CD Pipeline mit GitLab
+- Azure-Deployment mit Bicep/Terraform
+- Redis-backed Rate Limiting für horizontale Skalierung
 
 ---
 

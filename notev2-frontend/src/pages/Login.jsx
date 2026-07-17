@@ -28,7 +28,8 @@ function Login({ setToken }) {
         navigate("/notes");
     } catch (error) {
         console.error("Login failed:", error);
-        setError("Benutzername oder Passwort falsch");
+
+        setError(error.response.data.message);
     }
     setUsername("");
     setPassword("");
