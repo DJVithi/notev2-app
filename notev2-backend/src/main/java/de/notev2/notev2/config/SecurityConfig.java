@@ -21,8 +21,11 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class SecurityConfig {
 
-    @Autowired
-    private JwtFilter jwtFilter;
+    private final JwtFilter jwtFilter;
+
+    public SecurityConfig(JwtFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
     
    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, CustomUserDetailsService userDetailsService) throws Exception {
@@ -69,5 +72,4 @@ public class SecurityConfig {
 
     }
 }
-//test2:eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MiIsImlhdCI6MTc3NzI5NTMwMCwiZXhwIjoxNzc3MzgxNzAwfQ.x5p9B1cD20M8FiW81c8XglaazxUbsUvdyiPB4Ygw3Ic
-//test:eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0IiwiaWF0IjoxNzc3Mjk0NzAzLCJleHAiOjE3NzczODExMDN9.AfwhPdsALtz64-xkend3fiRgiNUTUdm86C4YC0TrqNs
+
