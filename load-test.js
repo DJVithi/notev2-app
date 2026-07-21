@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check } from 'k6';
 
 export const options = {
-  vus: 100,        
+  vus: 500,        
   duration: '30s'
 };
 
@@ -23,7 +23,8 @@ const params = {
 //};
 
 export default function () {
-  const res = http.post('http://localhost:8080/auth/login', payload, params);
+  const res = http.post('https://notev2-backend.lemonforest-50b3d4e4.northeurope.azurecontainerapps.io/auth/login', payload, params);
+
 
   check(res, {
     'ist 401 (falsche Credentials, aber durchgelassen)': (r) => r.status === 401,

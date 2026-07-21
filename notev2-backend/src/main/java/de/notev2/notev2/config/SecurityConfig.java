@@ -74,6 +74,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
     
         config.setAllowedOrigins(List.of("http://localhost"));
+        config.setAllowedOrigins(List.of("https://notev2-frontend.lemonforest-50b3d4e4.northeurope.azurecontainerapps.io"));
+        
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

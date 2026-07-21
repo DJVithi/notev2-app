@@ -144,13 +144,35 @@ k6 run load-test.js
 
 ---
 
-## Deployment
+## Deployment (Azure)
 
-- Geplant: Azure (Backend als Container, Frontend als Static Web App)
-- Aktuell lokal via Docker Compose lauffähig
+Die App wurde erfolgreich auf Azure Container Apps deployed (Backend, Frontend, PostgreSQL Flexible Server), provisioniert via Terraform.
 
+![Login Screen](docs/login_default.png)
+![Login Error Screen](docs/login_error.png)
+
+![Regristrieren Screen](docs/registrieren_default.png)
+![Regristrieren Error Screen](docs/registrieren_error.png)
+
+![RateLimit Error Screen](docs/rate_limit_error.png)
+
+![Notes App](docs/notes.png)
+![Azure Resources](docs/azure_dashboardpng)
 ---
 
+### Beobachtungen beim Cloud-Loadtest
+
+![CPU Usage AVG](docs/cloud_load_test.png)
+
+- Cold Start (min_replicas=0): Erster Request nach Idle-Zeit ~45s Latenz, 
+  danach (warmer Container) ~109ms avg – klassischer Scale-to-Zero-Tradeoff.
+- Rate Limiting funktioniert grundsätzlich, aber hinter Azures Reverse Proxy 
+  liefert request.getRemoteAddr() die Proxy-IP statt der echten Client-IP – 
+  alle Anfragen teilen sich effektiv denselben Bucket. Fix: Auswertung des 
+  X-Forwarded-For-Headers (geplante Erweiterung).
+
+
+---
 ## Geplante Erweiterungen
 
 - Notizen bearbeiten
