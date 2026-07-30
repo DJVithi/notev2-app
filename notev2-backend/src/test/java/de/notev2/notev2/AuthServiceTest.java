@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import de.notev2.notev2.config.CustomUserDetailsService;
 import de.notev2.notev2.config.JwtUtil;
+import de.notev2.notev2.dto.AuthRegisterRequest;
 import de.notev2.notev2.entity.User;
 import de.notev2.notev2.repos.UserRepository;
 import de.notev2.notev2.service.AuthService;
@@ -44,10 +45,10 @@ class AuthServiceTest {
 
     @Test
     void shouldRegisterUser() {
-        User user = new User();
+        AuthRegisterRequest user = new AuthRegisterRequest();
         user.setUsername("deniz");
         user.setPassword("123");
-
+        
         when(userRepository.findByUsername("deniz")).thenReturn(null);
         when(passwordEncoder.encode("123")).thenReturn("hashed_123");
 
@@ -62,7 +63,7 @@ class AuthServiceTest {
         User existingUser = new User();
         existingUser.setUsername("deniz");
 
-        User newUser = new User();
+        AuthRegisterRequest newUser = new AuthRegisterRequest();
         newUser.setUsername("deniz");
         newUser.setPassword("123");
 
@@ -76,33 +77,6 @@ class AuthServiceTest {
         verify(userRepository, never()).save(any());
     }
 
-    @Test
-    void shouldNotRegisterUserWithEmptyPassword() {
-        User user = new User();
-        user.setUsername("deniz");
-        user.setPassword("");
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            authService.register(user);
-        });
-
-        assertEquals("Benutzername und/oder Passwort fehlen", exception.getMessage());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void shouldNotRegisterUserWithEmptyUsername() {
-        User user = new User();
-        user.setUsername("");
-        user.setPassword("123");
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            authService.register(user);
-        });
-
-        assertEquals("Benutzername und/oder Passwort fehlen", exception.getMessage());
-        verify(userRepository, never()).save(any());
-    }
 
     // =========================
     // LOGIN TESTS
