@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional; // WICHTIG!
 
-import com.jayway.jsonpath.JsonPath;
 
 import de.notev2.notev2.entity.User;
 import de.notev2.notev2.repos.UserRepository;
