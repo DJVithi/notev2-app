@@ -18,15 +18,29 @@ function Register()  {
             const response = await API.post("/auth/register", { username, password });
             console.log("Registration erfolgreich:", response.data.message);
             setSuccess(response.data.message);
+            setUsername("");
+            setPassword("");
             navigate("/login");
 
         } catch (error) {
-            console.error("Registration fehlgeschlagen:", error);
-            setError(error.response.data.message);
+
+          console.error("Regristrierung fehlgeschlagen ",error.response?.data);
+
+          const apiData = error.response?.data;
+
+          if (apiData?.errors) {
+            // Wandelt das errors-Objekt { username: "...", password: "..." } in einen Lesbaren Text um
+            const detailMessages = Object.values(apiData.errors).join(" | ");
+            setError(detailMessages);
+          } else if (apiData?.message) {
+            setError(apiData.message);
+          } else {
+            setError("Verbindung zum Server fehlgeschlagen.");
+          }
+        };
             
-        }
-        setUsername("");
-        setPassword("");
+        
+        
     };  
     
 

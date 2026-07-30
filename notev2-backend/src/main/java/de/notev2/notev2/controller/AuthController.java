@@ -1,6 +1,5 @@
 package de.notev2.notev2.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,22 +9,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.notev2.notev2.entity.User;
 import de.notev2.notev2.service.AuthService;
+import de.notev2.notev2.dto.AuthRegisterRequest;
 import de.notev2.notev2.dto.AuthResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
-
-
+import jakarta.validation.Valid;
 
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @Operation(summary = "Register", description = "Registriert einen neuen Benutzer")
         @ApiResponses(value = {
@@ -43,8 +44,8 @@ public class AuthController {
             )
     })
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody User user) {
-        String message = authService.register(user);
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody AuthRegisterRequest request) {
+        String message = authService.register(request);
         return ResponseEntity.ok(new AuthResponse(null, message));
         
     }

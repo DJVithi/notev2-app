@@ -21,12 +21,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 
-   // private final JwtFilter jwtFilter;
-//
-   // public SecurityConfig(JwtFilter jwtFilter) {
-   //     this.jwtFilter = jwtFilter;
-   // }
-    
    private final JwtUtil jwtUtil;
    private final CustomUserDetailsService customUserDetailsService;
 
@@ -73,8 +67,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
     
-        config.setAllowedOrigins(List.of("http://localhost"));
-        config.setAllowedOrigins(List.of("https://notev2-frontend.lemonforest-50b3d4e4.northeurope.azurecontainerapps.io"));
+        config.setAllowedOrigins(List.of(
+            "http://localhost",
+            "https://notev2-frontend.lemonforest-50b3d4e4.northeurope.azurecontainerapps.io"));
         
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

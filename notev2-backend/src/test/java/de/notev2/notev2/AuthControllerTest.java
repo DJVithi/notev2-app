@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional; // WICHTIG!
 
+
 import de.notev2.notev2.entity.User;
 import de.notev2.notev2.repos.UserRepository;
 
@@ -112,5 +113,140 @@ public class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void register_withEmptyUsername_shouldReturnBadRequest() throws Exception {
+        String request = """
+            {
+                "username" : "",
+                "password" : "123"
+            }
+            """;
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.username")
+                        .exists());
+            
+    }
+    @Test
+    void register_withEmptyPassword_shouldReturnBadRequest() throws Exception {
+        String request = """
+            {
+                "username" : "deniz",
+                "password" : ""
+            }
+            """;
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.password")
+                        .exists());
+            
+    }
+    @Test
+    void register_withEmptyUsernamePassword_shouldReturnBadRequest() throws Exception {
+        String request = """
+            {
+                "username" : "",
+                "password" : ""
+            }
+            """;
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.username")
+                        .exists()) 
+                .andExpect(jsonPath("$.errors.password")
+                        .exists());
+            
+    }
+    @Test
+    void register_withEmptyUsernameAndwithSpacesPassword_shouldReturnBadRequest() throws Exception {
+        String request = """
+            {
+                "username" : "",
+                "password" : "   "
+            }
+            """;
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.username")
+                        .exists()) 
+                .andExpect(jsonPath("$.errors.password")
+                        .exists());
+            
+    }
+    @Test
+    void register_withSpacesUsernameAndwithEmptyPassword_shouldReturnBadRequest() throws Exception {
+        String request = """
+            {
+                "username" : "   ",
+                "password" : ""
+            }
+            """;
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.username")
+                        .exists()) 
+                .andExpect(jsonPath("$.errors.password")
+                        .exists());
+            
+    }
+    @Test
+    void register_withMaxLengthUsername_shouldReturnBadRequest() throws Exception {
+        String longUsername = "a".repeat(51);
+        String request = """
+            {
+                "username" : "%s",
+                "password" : "123"
+            }
+            """.formatted(longUsername);
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.username")
+                        .exists());
+            
+    }
+    @Test
+    void register_withMaxLengthPassword_shouldReturnBadRequest() throws Exception {
+        String longPassword = "a".repeat(51);
+        String request = """
+            {
+                "username" : "deniz",
+                "password" : "%s"
+            }
+            """.formatted(longPassword);
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.password")
+                        .exists());
+            
     }
 }

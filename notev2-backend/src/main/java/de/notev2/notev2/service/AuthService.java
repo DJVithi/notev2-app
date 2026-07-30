@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import de.notev2.notev2.config.CustomUserDetailsService;
 import de.notev2.notev2.config.JwtUtil;
+import de.notev2.notev2.dto.AuthRegisterRequest;
 import de.notev2.notev2.entity.User;
-import de.notev2.notev2.exception.EmptyFieldException;
 import de.notev2.notev2.exception.UserAlreadyExistsException;
 import de.notev2.notev2.exception.InvalidCredentialsException;
 import de.notev2.notev2.repos.UserRepository;
@@ -32,17 +32,15 @@ public class AuthService {
         this.userDetailsService = userDetailsService;
     }
 
-    public String register(User user) {
+    public String register(AuthRegisterRequest request) {
 
-        if (user.getUsername() == null || user.getUsername().isEmpty() ||
-            user.getPassword() == null || user.getPassword().isEmpty()) {
-            throw new EmptyFieldException("Benutzername und/oder Passwort fehlen");
-        }
-
-        if (userRepository.findByUsername(user.getUsername()) != null) {
+        if (userRepository.findByUsername(request.getUsername()) != null) {
             throw new UserAlreadyExistsException("Username bereits vergeben");
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         userRepository.save(user);
 
         return "Registrierung erfolgreich";

@@ -22,11 +22,11 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
+            errors.putIfAbsent(error.getField(), error.getDefaultMessage());
         });
 
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Validation failed");
+        response.put("message", "Validierung fehlgeschlagen");
         response.put("errors", errors);
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
