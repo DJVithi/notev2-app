@@ -94,6 +94,98 @@ public class AuthControllerTest {
     }
 
     @Test
+    void login_withEmptyUsername_shouldReturnBadRequest() throws Exception {
+    
+        String request = """
+            {
+                "username": "",
+                "password": "123"
+            }
+            """;
+
+        mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.username").exists());
+    }
+
+    @Test
+    void login_withEmptyPassword_shouldReturnBadRequest() throws Exception {
+    
+        String request = """
+            {
+                "username": "deniz",
+                "password": ""
+            }
+            """;
+
+        mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.password").exists());
+    }
+
+    @Test
+    void login_withEmptyUsernameAndPassword_shouldReturnBadRequest() throws Exception {
+    
+        String request = """
+            {
+                "username": "",
+                "password": ""
+            }
+            """;
+
+        mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.username").exists())
+                .andExpect(jsonPath("$.errors.password").exists());
+
+    }
+    @Test
+    void login_withMaxLengthUsername_shouldReturnBadRequest() throws Exception {
+        String username = "a".repeat(51);
+        String request = """
+            {
+                "username": "%s",
+                "password": "123"
+            }
+            """.formatted(username);
+
+        mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.username").exists());
+    }
+    @Test
+    void login_withMaxLengthPassword_shouldReturnBadRequest() throws Exception {
+        String password = "a".repeat(51);
+        String request = """
+            {
+                "username": "deniz",
+                "password": "%s"
+            }
+            """.formatted(password);
+
+        mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Validierung fehlgeschlagen"))
+                .andExpect(jsonPath("$.errors.password").exists());
+    }
+    
+            
+
+    @Test
     void register_withExistingUsername_shouldReturnBadRequest() throws Exception {
      
         String request = """
