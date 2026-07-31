@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.notev2.notev2.entity.User;
+
 import de.notev2.notev2.service.AuthService;
 import de.notev2.notev2.dto.AuthLoginRequest;
 import de.notev2.notev2.dto.AuthRegisterRequest;
