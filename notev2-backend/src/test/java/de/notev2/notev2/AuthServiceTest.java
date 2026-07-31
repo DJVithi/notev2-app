@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import de.notev2.notev2.config.CustomUserDetailsService;
 import de.notev2.notev2.config.JwtUtil;
+import de.notev2.notev2.dto.AuthLoginRequest;
 import de.notev2.notev2.dto.AuthRegisterRequest;
 import de.notev2.notev2.entity.User;
 import de.notev2.notev2.repos.UserRepository;
@@ -84,7 +85,7 @@ class AuthServiceTest {
 
     @Test
     void shouldLoginUser() {
-        User requestUser = new User();
+        AuthLoginRequest requestUser = new AuthLoginRequest();
         requestUser.setUsername("deniz");
         requestUser.setPassword("123");
 
@@ -110,7 +111,7 @@ class AuthServiceTest {
 
     @Test
     void shouldNotLoginWithWrongPassword() {
-        User requestUser = new User();
+        AuthLoginRequest requestUser = new AuthLoginRequest();
         requestUser.setUsername("deniz");
         requestUser.setPassword("wrong");
 
@@ -130,7 +131,7 @@ class AuthServiceTest {
 
     @Test
     void shouldNotLoginWithNonExistingUser() {
-        User user = new User();
+        AuthLoginRequest user = new AuthLoginRequest();
         user.setUsername("deniz");
         user.setPassword("123");
 
@@ -145,7 +146,7 @@ class AuthServiceTest {
 
     @Test
     void shouldNotLoginWithEmptyUsername() {
-        User user = new User();
+        AuthLoginRequest user = new AuthLoginRequest();
         user.setUsername("");
         user.setPassword("123");
 
@@ -160,7 +161,7 @@ class AuthServiceTest {
 
     @Test
     void shouldNotLoginWithEmptyPassword() {
-        User requestUser = new User();
+        AuthLoginRequest requestUser = new AuthLoginRequest();
         requestUser.setUsername("deniz");
         requestUser.setPassword("");
 
@@ -177,4 +178,6 @@ class AuthServiceTest {
 
         assertEquals("Benutzername oder Passwort falsch", exception.getMessage());
     }
+
+
 }

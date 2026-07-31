@@ -27,9 +27,19 @@ function Login({ setToken }) {
         setToken(response.data.token);
         navigate("/notes");
     } catch (error) {
-        console.error("Login failed:", error);
+        console.error("Login failed:", error.response?.date);
 
-        setError(error.response.data.message);
+        const apiData = error.response?.data;
+
+          if (apiData?.errors) {
+            // Wandelt das errors-Objekt { username: "...", password: "..." } in einen Lesbaren Text um
+            const detailMessages = Object.values(apiData.errors).join(" | ");
+            setError(detailMessages);
+          } else if (apiData?.message) {
+            setError(apiData.message);
+          } else {
+            setError("Verbindung zum Server fehlgeschlagen.");
+          }
     }
     setUsername("");
     setPassword("");

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import de.notev2.notev2.config.CustomUserDetailsService;
 import de.notev2.notev2.config.JwtUtil;
+import de.notev2.notev2.dto.AuthLoginRequest;
 import de.notev2.notev2.dto.AuthRegisterRequest;
 import de.notev2.notev2.entity.User;
 import de.notev2.notev2.exception.UserAlreadyExistsException;
@@ -46,12 +47,12 @@ public class AuthService {
         return "Registrierung erfolgreich";
     }
 
-    public String login(User user) {
+    public String login(AuthLoginRequest request) {
 
-        User existingUser = userRepository.findByUsername(user.getUsername());
+        User existingUser = userRepository.findByUsername(request.getUsername());
 
         if (existingUser != null &&
-            passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
+            passwordEncoder.matches(request.getPassword(), existingUser.getPassword())) {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(existingUser.getUsername());
             return jwtUtil.generateToken(userDetails);
