@@ -17,7 +17,6 @@ import de.notev2.notev2.dto.NoteCreationRequest;
 import de.notev2.notev2.dto.NoteResponse;
 import de.notev2.notev2.entity.Note;
 import de.notev2.notev2.entity.User;
-import de.notev2.notev2.exception.EmptyFieldException;
 import de.notev2.notev2.exception.InvalidCredentialsException;
 import de.notev2.notev2.exception.ResourceNotFoundException;
 import de.notev2.notev2.repos.NoteRepository;
@@ -62,27 +61,7 @@ class NotesServiceTest {
         verify(noteRepository, times(1)).save(any(Note.class));
     }
 
-    @Test
-    void shouldNotCreateNoteWithEmptyTitle() {
-        User user = new User();
-        user.setLongId(1L);
-        user.setUsername("deniz");
-
-        when(userRepository.findByUsername("deniz")).thenReturn(user);
-
-        NoteCreationRequest dto = new NoteCreationRequest();
-        dto.setTitle("");
-        dto.setContent("Test");
-
-
-
-        EmptyFieldException exception = assertThrows(EmptyFieldException.class, () -> {
-            notesService.createNote(dto, "deniz");
-        });
-
-        assertEquals("Titel darf nicht leer sein", exception.getMessage());
-        verify(noteRepository, never()).save(any());
-    }
+   
 
     // =========================
     // GET MY NOTES

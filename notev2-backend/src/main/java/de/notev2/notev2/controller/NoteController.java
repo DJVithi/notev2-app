@@ -2,6 +2,8 @@ package de.notev2.notev2.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -38,7 +40,7 @@ public class NoteController {
     @Operation(summary = "Create Note", description = "Erstellt eine neue Notiz für den angemeldeten Benutzer")
     @ApiResponses(value = {
         @ApiResponse(
-                responseCode = "200",
+                responseCode = "201",
                 description = "Notiz erfolgreich erstellt"
         ),
         @ApiResponse(
@@ -47,9 +49,10 @@ public class NoteController {
         )
     })
     @PostMapping
-    public NoteResponse createNote(@Valid @RequestBody NoteCreationRequest note, Authentication auth) {
+    public ResponseEntity<NoteResponse> createNote(@Valid @RequestBody NoteCreationRequest note, Authentication auth) {
 
-        return noteService.createNote(note, auth.getName());
+        NoteResponse result = noteService.createNote(note, auth.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @Operation(summary = "Get My Notes", description = "Ruft alle Notizen des angemeldeten Benutzers ab")
@@ -64,8 +67,9 @@ public class NoteController {
         )
     })
     @GetMapping
-    public List<NoteResponse> getMyNotes(Authentication auth) {
-        return noteService.getMyNotes(auth.getName());
+    public ResponseEntity<List<NoteResponse>> getMyNotes(Authentication auth) {
+        List<NoteResponse> result =  noteService.getMyNotes(auth.getName());
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
 
