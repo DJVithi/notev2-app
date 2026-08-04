@@ -11,7 +11,7 @@ public class AuthRegisterRequest {
     private String username;
 
     @NotBlank(message = "Passwort darf nicht leer sein")
-    @Size(min = 2, max = 50,  message = "Passwort muss mind. 2 Zeichen haben")
+    @Size(min = 2, max = 50,  message = "Passwort muss zwischen 2 und max 50 Zeichen lang sein")
     @Pattern(regexp = "^\\S+$", message = "Passwort darf keine Leerzeichen enthalten")
     private String password;
 

@@ -78,7 +78,7 @@ void setUp() {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(request)
                     .header("Authorization", "Bearer " + validToken))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isCreated());
     
     }
 
@@ -128,8 +128,8 @@ void setUp() {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .header("Authorization", "Bearer " + validToken))
-                .andExpect(status().isBadRequest());
-
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.title").exists());
     }
 
     @Test

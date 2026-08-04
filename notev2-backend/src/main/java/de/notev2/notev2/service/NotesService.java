@@ -45,9 +45,6 @@ public class NotesService {
             throw new InvalidCredentialsException("Benutzer nicht gefunden");
         }
 
-        if(dto.getTitle() == null || dto.getTitle().isBlank()) {
-            throw new EmptyFieldException("Titel darf nicht leer sein");
-        }
 
         Note note = new Note();
         note.setTitle(dto.getTitle());
