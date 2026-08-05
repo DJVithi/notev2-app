@@ -44,9 +44,8 @@ class NotesServiceTest {
         User user = new User();
         user.setUsername("deniz");
 
-        NoteCreationRequest dto = new NoteCreationRequest();
-        dto.setTitle("Test");
-        dto.setContent("Test Content");
+        NoteCreationRequest dto = new NoteCreationRequest("Test", "Test Content");
+
 
         Note note = new Note();
         note.setTitle(dto.getTitle());
