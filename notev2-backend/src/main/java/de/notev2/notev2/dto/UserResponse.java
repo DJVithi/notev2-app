@@ -4,7 +4,7 @@ package de.notev2.notev2.dto;
 public class UserResponse {
     private Long id;
     private String username;
-    private Boolean admin;
+    private boolean admin;
 
     public UserResponse(Long long1, String string, Boolean boolean1) {
         this.id = long1;
@@ -33,7 +33,7 @@ public class UserResponse {
         return admin;
     }
 
-    public void setAdmin(Boolean admin) {
+    public void setAdmin(boolean admin) {
         this.admin = admin;
     }
 

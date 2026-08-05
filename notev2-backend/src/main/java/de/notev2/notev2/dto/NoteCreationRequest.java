@@ -14,8 +14,6 @@ public class NoteCreationRequest {
 
 
 
-    public NoteCreationRequest() {
-    }
 
     public NoteCreationRequest(String title, String content) {
         this.title = title;

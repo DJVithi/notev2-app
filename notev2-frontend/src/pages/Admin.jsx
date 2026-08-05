@@ -3,6 +3,22 @@ import { getAllUsers, registerUser } from "../api/user";
 import { getCurrentUser } from "../api/auth";
 import { useEffect, useState } from "react";
 
+function extractErrorMessage(errorData) {
+  if (!errorData) return "Ein Fehler ist aufgetreten";
+
+  // Validation-Errors (@Valid)
+  if (errorData.errors) {
+    return Object.values(errorData.errors).join(", ");
+  }
+
+  // Normale Backend-Errors
+  if (errorData.message) {
+    return errorData.message;
+  }
+
+  return "Ein Fehler ist aufgetreten";
+}
+
 function Admin() {
   const [users, setUsers] = useState([]);          // ← alle User als Array
   const [currentUser, setCurrentUser] = useState("");
@@ -23,7 +39,8 @@ function Admin() {
       const response = await getAllUsers();
       setUsers(response.data);                     // ← Array setzen
     } catch (error) {
-      console.error("Fehler beim Laden der Benutzer", error);
+      console.error("Fehler beim Laden der Benutzer", error.response?.data);
+      setError(extractErrorMessage(error.response?.data));
     }
   };
 
@@ -32,7 +49,8 @@ function Admin() {
       const response = await getCurrentUser();
       setCurrentUser(response.data.message);
     } catch (error) {
-      console.error("Fehler beim Laden des Benutzers", error);
+      console.error("Fehler beim Laden des Benutzers", error.response?.data);
+      setError(extractErrorMessage(error.response?.data));
     }
   };
 
@@ -48,7 +66,9 @@ function Admin() {
       setAdmin(false);
       fetchAllUsers();                             // ← Liste neu laden
     } catch (error) {
-      setError(error.response.data.message);
+      console.error("Fehler beim Erstellen des Benutzers", error.response?.data);
+      setError(extractErrorMessage(error.response?.data));
+      setSuccess("");
     }
   };
 
@@ -89,9 +109,8 @@ function Admin() {
                   </div>
                   <span className="font-medium">{user.username}</span>
                 </div>
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  user.admin ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
-                }`}>
+                <span className={`text-xs px-2 py-1 rounded-full ${user.admin ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
+                  }`}>
                   {user.admin ? "Admin" : "User"}
                 </span>
               </div>
