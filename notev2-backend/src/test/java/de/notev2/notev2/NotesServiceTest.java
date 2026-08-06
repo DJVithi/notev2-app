@@ -44,8 +44,9 @@ class NotesServiceTest {
         User user = new User();
         user.setUsername("deniz");
 
-        NoteCreationRequest dto = new NoteCreationRequest("Test", "Test Content");
-
+        NoteCreationRequest dto = new NoteCreationRequest();
+        dto.setTitle("Test");
+        dto.setContent("Test Content");
 
         Note note = new Note();
         note.setTitle(dto.getTitle());
@@ -60,8 +61,6 @@ class NotesServiceTest {
         verify(noteRepository, times(1)).save(any(Note.class));
     }
 
-   
-
     // =========================
     // GET MY NOTES
     // =========================
@@ -73,7 +72,6 @@ class NotesServiceTest {
 
         List<Note> notes = List.of(new Note(), new Note());
 
-
         when(userRepository.findByUsername("deniz")).thenReturn(user);
         when(noteRepository.findByUserOrderByIdDesc(user)).thenReturn(notes);
 
@@ -81,7 +79,6 @@ class NotesServiceTest {
 
         assertEquals(2, result.size());
     }
-
 
     // =========================
     // DELETE NOTE
@@ -114,7 +111,6 @@ class NotesServiceTest {
 
         when(userRepository.findByUsername("deniz")).thenReturn(user);
         when(noteRepository.findById(1L)).thenReturn(Optional.empty());
-        
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             notesService.deleteNote(1L, "deniz");

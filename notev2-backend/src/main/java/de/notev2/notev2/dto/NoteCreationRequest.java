@@ -13,13 +13,6 @@ public class NoteCreationRequest {
     private String content;
 
 
-
-
-    public NoteCreationRequest(String title, String content) {
-        this.title = title;
-        this.content = content;
-    }
-
     public String getTitle() {
         return title;
     }
